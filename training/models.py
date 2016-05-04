@@ -36,10 +36,17 @@ class Provider(models.Model):
     def __str__(self):
         return self.name
 
+
+class CategoryLiveManager(models.Manager):
+    def get_queryset(self):
+        return super(CategoryLiveManager, self).get_queryset().filter(is_enable=True)
+
 class Category(models.Model):
     name = models.CharField(_('category name'), max_length=50)
     parent = models.ForeignKey('self', blank=True, null=True)
     is_enable = models.BooleanField(default=False)
+    objects = models.Manager()
+    live = CategoryLiveManager()
     class Meta:
         db_table = 'categories'
         verbose_name = 'Category'
@@ -47,6 +54,23 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
+
+    @classmethod
+    def category_tree(cls, cat_parent=None):
+        queryset = cls.live
+        if cat_parent is None:
+            queryset = queryset.filter(parent__isnull=True)
+        else:
+            queryset = queryset.filter(parent=cat_parent)
+        queryset = queryset.order_by("name")
+        # print(queryset.query)
+
+        cat_list = []
+        for cat in queryset:
+            cat_dict = {wk: getattr(cat, wk) for wk in ['id', 'name']}
+            cat_dict["subs"] = cls.category_tree(cat_dict["id"])
+            cat_list.append(cat_dict)
+        return cat_list
 
 class Package(models.Model):
     LEVEL_CHOICES = (
@@ -60,7 +84,7 @@ class Package(models.Model):
     photo = models.ImageField(_('Package photo'), blank=True)
     price = models.IntegerField(_('Package price'), default=0)
     discount = models.IntegerField(_('Package name'), default=0)
-    category = models.ForeignKey(Category, verbose_name=_('Category'))
+    category = models.ManyToManyField(Category)
     provider = models.ForeignKey(Provider, verbose_name=_('Provider'),null=True)
     description = models.TextField(_('Package description'), blank=True)
     level = models.IntegerField(_('Package level'), choices=LEVEL_CHOICES,default=1)

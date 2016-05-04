@@ -36,16 +36,13 @@ class PackageSerializer(serializers.ModelSerializer):
     links = serializers.SerializerMethodField()
     class Meta:
         model = Package
-        fields = ('id','name', 'photo','price', 'discount', 'category', 'provider', 'description', 'level', 'is_enable','links')
+        fields = ('id','name', 'photo','price', 'discount', 'provider', 'description', 'level', 'is_enable','links')
     def get_links(self, obj):
         request = self.context['request']
         links = {'self': reverse('package-detail', kwargs={'pk': obj.pk}, request=request),}
-        if obj.category_id:
-            links['category'] = reverse('category-detail', kwargs={'pk': obj.category_id}, request=request)
         return links
 
 class LessonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lesson
         fields = ('id','name', 'package', 'order')
-        

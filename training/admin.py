@@ -5,8 +5,8 @@ from .models import Provider, User, Category, Package, Lesson, Card, UserPackage
 class UserPackageAdmin(admin.TabularInline):
     model = UserPackage
 
-class PackageCategoryAdmin(admin.TabularInline):
-    model = Package
+# class PackageCategoryAdmin(admin.TabularInline):
+#     model = Package
 
 class LessonPackageAdmin(admin.TabularInline):
     model = Lesson
@@ -26,12 +26,12 @@ class UserAdmin(admin.ModelAdmin):
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ("name", "parent")
-    inlines = [PackageCategoryAdmin]
+    # inlines = [PackageCategoryAdmin]
 
 
 @admin.register(Package)
 class PackageAdmin(admin.ModelAdmin):
-    list_display = ("name", "photo", "price", "discount", "category", "provider", "description", "level", "is_enable")
+    list_display = ("name", "photo", "price", "discount", "provider", "description", "level", "is_enable")
     inlines = [LessonPackageAdmin]
 
 @admin.register(Lesson)
